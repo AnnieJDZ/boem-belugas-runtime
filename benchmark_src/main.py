@@ -6,7 +6,7 @@ from PIL import Image
 from sklearn.metrics.pairwise import cosine_similarity
 import torch
 import torchvision.models as models
-# from models.resnet import *
+from resnet import *
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 from tqdm import tqdm
@@ -16,9 +16,12 @@ ROOT_DIRECTORY = Path("/code_execution")
 PREDICTION_FILE = ROOT_DIRECTORY / "submission" / "submission.csv"
 DATA_DIRECTORY = ROOT_DIRECTORY / "data"
 
-BENCHMARK_SRC = ROOT_DIRECTORY / "benchmark_src"
-model = models.resnet34(pretrained=True)
-torch.save(model, BENCHMARK_SRC / "model.pth")
+pretrained_model_name = "resnet34-333f7ec4.pth"
+
+# BENCHMARK_SRC = ROOT_DIRECTORY / "benchmark_src"
+# model = resnet34()
+# model.load_state_dict("resnet34-333f7ec4.pth") #models.resnet34(pretrained=True)
+# torch.save(model, BENCHMARK_SRC / "model.pth")
 
 class ImagesDataset(Dataset):
     """Reads in an image, transforms pixel values, and serves
@@ -53,9 +56,9 @@ def main():
     query_scenarios = pd.read_csv(DATA_DIRECTORY / "query_scenarios.csv", index_col="scenario_id")
     metadata = pd.read_csv(DATA_DIRECTORY / "metadata.csv", index_col="image_id")
     logger.info("Loading pre-trained model")
-    # model = resnet34()
-    # model.load_state_dict(torch.load("resnet34-333f7ec4.pth"))
-    model = torch.load("model.pth")
+    model = resnet34()
+    model.load_state_dict(torch.load(pretrained_model_name))
+    # model = torch.load("model.pth")
 
     # we'll only precompute embeddings for the images in the scenario files (rather than all images), so that the
     # benchmark example can run quickly when doing local testing. this subsetting step is not necessary for an actual
