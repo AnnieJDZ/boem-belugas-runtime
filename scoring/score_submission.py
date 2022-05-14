@@ -50,7 +50,8 @@ class MeanAveragePrecision:
             how="left",
             on=[QUERY_ID_COL, DATABASE_ID_COL],
         ).fillna({"actual": 0.0})
-        # Per-query raw average precisions based on predictions
+        # Per-query raw average precis
+        # ions based on predictions
         unadjusted_aps = merged.groupby(QUERY_ID_COL).apply(
             lambda df: average_precision_score(df["actual"].values, df[SCORE_COL].values)
             if df["actual"].sum()
@@ -75,7 +76,7 @@ def main(
         exists=True,
         dir_okay=False,
         readable=True,
-        help="Path to ground truth CSV file.",
+        help="Path to ground truth CSV file.",""
     ),
 ):
     """Evaluate a submission for the "Where's Whale-do?" beluga whale photo-identification
