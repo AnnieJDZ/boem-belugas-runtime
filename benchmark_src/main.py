@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import random
 from loguru import logger
 import pandas as pd
 from PIL import Image
@@ -67,12 +67,33 @@ def main():
     for row in query_scenarios.itertuples():
         scenario_imgs.extend(pd.read_csv(DATA_DIRECTORY / row.queries_path).query_image_id.values)
         scenario_imgs.extend(pd.read_csv(DATA_DIRECTORY / row.database_path).database_image_id.values)
-    scenario_imgs = sorted(set(scenario_imgs))
-    metadata = metadata.loc[scenario_imgs]
+
+    # No need to sort yet, we make these a set in the end
+
+    # First we shuffle scenario  images
+    random.shuffle(scenario_imgs)
+    print(len(scenario_imgs))
+
+    split_ratio = 0.7
+    split_index = int(split_ratio*len(scenario_imgs))
+    train_scen_imgs = scenario_imgs[:split_index]
+    val_scen_imgs = scenario_imgs[split_index:]
+
+    # Make these sets
+    train_scen_imgs = sorted(set(train_scen_imgs))
+    val_scen_imgs = sorted(set(val_scen_imgs))
+    full_dataset = sorted(set(scenario_imgs))
+
+    metadata = metadata.loc[full_dataset]
+    train_metadata = metadata.loc[train_scen_imgs]
+    val_metadata = metadata.loc[val_scen_imgs]
 
     # instantiate dataset/loader and generate embeddings for all images
     dataset = ImagesDataset(metadata)
     dataloader = DataLoader(dataset, batch_size=16)
+    train_dataloader = DataLoader(train_metadata, batch_size=16)
+    val_dataloader = DataLoader(val_metadata, batch_size=16)
+    
     embeddings = []
     model.eval()
 

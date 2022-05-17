@@ -1,52 +1,3 @@
-def dice_loss(pred, target, smooth=1E-9):
-    # taken from https://github.com/usuyama/pytorch-unet
-    pred = pred.contiguous()
-    target = target.contiguous()
-
-    intersection = (pred * target).sum(dim=2).sum(dim=2)
-
-    loss = (1 - ((2. * intersection + smooth) / (pred.sum(dim=2).sum(dim=2) + target.sum(dim=2).sum(dim=2) + smooth)))
-
-    return loss.mean()
-
-
-def calc_loss(pred, target, bce_weight=0.25):
-    # taken from https://github.com/usuyama/pytorch-unet
-    bce = F.binary_cross_entropy_with_logits(pred, target)
-
-    pred = torch.sigmoid(pred)
-    dice = dice_loss(pred, target)
-
-    loss = bce * bce_weight + dice * (1 - bce_weight)
-
-    return loss
-
-
-def dice_channel_batch(probability, truth, threshold):
-    # taken from https://www.kaggle.com/wh1tezzz/correct-dice-metrics-for-this-competition
-    batch_size = truth.shape[0]
-    channel_num = truth.shape[1]
-    mean_dice_channel = 0.
-    with torch.no_grad():
-        for i in range(batch_size):
-            for j in range(channel_num):
-                channel_dice = dice_single_channel(probability[i, j, :, :], truth[i, j, :, :], threshold)
-                # print("Channel", j, " - Dice:", channel_dice)
-                mean_dice_channel += channel_dice / (batch_size * channel_num)
-    return mean_dice_channel
-
-
-def dice_single_channel(probability, truth, threshold, eps=1E-9):
-    # taken from https://www.kaggle.com/wh1tezzz/correct-dice-metrics-for-this-competition
-    # print(probability)
-    p = (probability.view(-1) > threshold).float()
-    t = (truth.view(-1) > 0.5).float()
-    # print(p)
-    dice = (2.0 * (p * t).sum() + eps) / (p.sum() + t.sum() + eps)
-    # print("Channel Dice", dice)
-    return dice
-
-
 def get_accuracy(model, dataset, batch_size, useGPU=True, useAllDataForAccuracy=False):
     # To save time, only evaluate accuracy for 2.5% of the total number of batches at random if useAllDataForAccuracy == False
 
@@ -109,6 +60,7 @@ def plot_training_curve(iters, losses, train_acc, val_acc):
 def train(model, train_dataset, val_dataset, batch_size=64, num_epochs=1, learning_rate=0.01, momentum=0.9,
           useGPU=True, saveWeights=True, printIterations=False, useAdams=True, useAllDataForAccuracy=False,
           useDiceLoss=False):
+
     # Put data in data loaders
     train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size,
                                                     num_workers=0, shuffle=False)
