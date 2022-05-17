@@ -10,7 +10,7 @@ from resnet import *
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 from tqdm import tqdm
-
+from label_generation import *
 
 ROOT_DIRECTORY = Path("C:/Users/zpmao/Downloads/boem-belugas-runtime") #Path("/code_execution")
 PREDICTION_FILE = ROOT_DIRECTORY / "submission" / "submission.csv"
