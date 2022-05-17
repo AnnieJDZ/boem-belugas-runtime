@@ -5,7 +5,7 @@ import pandas as pd
 from PIL import Image
 from sklearn.metrics.pairwise import cosine_similarity
 import torch
-import torchvision.models as models
+#import torchvision.models as models
 from resnet import *
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
